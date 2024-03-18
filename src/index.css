@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@font-face {
+  font-family: "AvantGarde";
+  src: url("/src/fonts/avgardm.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AvantGarde";
+  src: url("/src/fonts/avgardmi.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "AvantGarde";
+  src: url("/src/fonts/avgardn.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AvantGarde";
+  src: url("/src/fonts/avgardni.ttf") format("truetype");
+  font-weight: bold;
+  font-style: italic;
+}
+
+body {
+  font-family: "Varela Round", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.custom-shadow {
+  text-shadow: -2px 0 3px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar {
+  width: 0.75rem;
+}
+::-webkit-scrollbar-thumb {
+  background: #565656;
+  border-radius: 0.3125rem;
+  height: 5%;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #122860;
+}
+::-webkit-scrollbar-track {
+  display: none;
+}
+h3 {
+  font-size: 22px;
+  color: #161922;
+  letter-spacing: 1px;
+}
+p {
+  font-size: 14px;
+
+  color: #404040;
+  line-height: 1.5;
+}
+a {
+  cursor: pointer;
+}
+section {
+  background: white;
+}
+.text_shadow {
+  margin: 0;
+  text-shadow: 2px 2px 4px #000;
+  line-height: normal;
+}
+
+.prueba {
+  padding-top: 160px;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+.page-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 440px;
+}
+
+footer.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #122860;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  z-index: -1;
+  letter-spacing: 1px;
+}
+
+main {
+  flex: 1;
+}
