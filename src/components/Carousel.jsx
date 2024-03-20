@@ -17,10 +17,14 @@ const Carousel = ({ images, height }) => {
     );
   };
 
+  const currentImageUrl = images[currentImageIndex]
+    ? images[currentImageIndex].img
+    : "";
+
   return (
     <div
       className={`relative ${height} w-full bg-cover`}
-      style={{ backgroundImage: `url(${images[currentImageIndex]})` }}
+      style={{ backgroundImage: `url(${currentImageUrl})` }}
     >
       <FaArrowAltCircleLeft
         onClick={prevImage}
@@ -35,7 +39,12 @@ const Carousel = ({ images, height }) => {
 };
 
 Carousel.propTypes = {
-  images: PropTypes.array.isRequired,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      img: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   height: PropTypes.string.isRequired,
 };
 

@@ -9,10 +9,33 @@ const Card = ({ properties }) => {
 
   return (
     <div className="grid bg-white grid-cols-3 place-items-center gap-6 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1 py-8 px-12 max-[800px]:px-4 max-[600px]:px-4">
-      {properties.map((property) => {
+      {properties?.map((property) => {
         const goToPropertyDetails = () => {
           navigate(`/propiedad/${property.id}`, { state: property });
         };
+
+        const information = [
+          {
+            id: 1,
+            type: "beds",
+            text: property.bedrooms,
+          },
+          {
+            id: 2,
+            type: "baths",
+            text: property.bathrooms,
+          },
+          {
+            id: 3,
+            type: "houseSize",
+            text: `${property.houseSize} M<sup>2</sup>`,
+          },
+          {
+            id: 4,
+            type: "lotSize",
+            text: `${property.area} M<sup>2</sup>`,
+          },
+        ];
         return (
           <div
             key={property.id}
@@ -29,7 +52,7 @@ const Card = ({ properties }) => {
                 text="Borrar"
               />
             </div>
-            <Carousel images={property.images} height={"h-[356px]"} />
+            <Carousel images={property.Images} height={"h-[356px]"} />
             <div className="absolute bottom-[24%] text-white w-full p-4 ">
               <h3 className="text-white text_shadow text-[16px]">
                 {property.title}
@@ -42,7 +65,7 @@ const Card = ({ properties }) => {
             </div>
             <div className="w-full bg-white">
               <ul className="flex justify-between items-center py-8 px-8">
-                {property.information.map((info) => (
+                {information?.map((info) => (
                   <li
                     className="flex flex-col items-center gap-2"
                     key={info.id}
