@@ -24,7 +24,6 @@ const Map = ({ locations }) => {
           mapId: "DEMO_MAP_ID",
         });
 
-        // Crea un marcador para cada ubicación
         locationsArray.forEach((location) => {
           new google.maps.marker.AdvancedMarkerElement({
             position: { lat: location.lat, lng: location.lng },

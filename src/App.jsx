@@ -5,20 +5,33 @@ import Button from "./components/Button";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
+
 function App() {
-  const [PROPERTIES, setProperties] = useState([]);
+  const [properties, setProperties] = useState([]);
   const navigate = useNavigate();
 
   const getProperties = async () => {
-    const res = await axios.get("http://localhost:3000/dev/properties ");
-    const data = res.data;
-    setProperties(data);
+    try {
+      const res = await axios.get("http://localhost:3000/dev/properties");
+      const data = res.data;
+      setProperties(data);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    }
   };
 
   useEffect(() => {
     getProperties();
   }, []);
-  console.log(PROPERTIES);
+
+  // Si PROPERTIES está vacío o aún está cargando, muestra un indicador de carga o retorna null
+  if (properties.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Cargando propiedades...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -29,9 +42,9 @@ function App() {
             onClick={() => navigate("/nueva-propiedad")}
           />
         </div>
-        <Card properties={PROPERTIES} />
+        <Card properties={properties} />
         <div className="bg-white flex justify-center">
-          <Map locations={PROPERTIES} />
+          <Map locations={properties} />
         </div>
       </Section>
     </>

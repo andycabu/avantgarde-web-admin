@@ -25,17 +25,18 @@ const Propertie = () => {
     lng: "",
     images: [],
   };
+  console.log(state);
 
   const initialState = isCreating
     ? defaultState
     : {
         title: state.title,
         price: state.price,
-        information: state.information.map((info) => ({ ...info })),
+        information: state?.information?.map((info) => ({ ...info })),
         description: state.description,
         lat: state.lat,
         lng: state.lng,
-        images: state.images,
+        images: state.Images,
       };
   const [isEditing, setIsEditing] = useState(isCreating && true);
   const [editedState, setEditedState] = useState(initialState);
@@ -62,7 +63,7 @@ const Propertie = () => {
   const handleInfoChange = (id, text) => {
     setEditedState({
       ...editedState,
-      information: editedState.information.map((info) =>
+      information: editedState?.information?.map((info) =>
         info.id === id ? { ...info, text } : info
       ),
     });
@@ -108,12 +109,6 @@ const Propertie = () => {
       images: prevState.images.filter((_, i) => i !== index),
     }));
   };
-  const getImagesForCarousel = (images) => {
-    return images.map((image) =>
-      typeof image === "string" ? image : image.url
-    );
-  };
-
   return (
     <Section className={"mt-[4.8rem]"}>
       <div className="pt-16 px-16 bg-white max-[800px]:px-8 max-[600px]:px-4">
@@ -170,7 +165,7 @@ const Propertie = () => {
           )}
         </div>
         <div className="my-8 flex max-[800px]:grid grid-cols-2 max-[600px]:grid-cols-2 gap-4 justify-center">
-          {editedState.information.map((info) => {
+          {editedState?.information?.map((info) => {
             const infoLabels = {
               beds: "Habitaciones",
               baths: "Baños",
@@ -204,7 +199,7 @@ const Propertie = () => {
           <>
             <h3 className="text-[26px] font-bold w-full text-center">Fotos</h3>
             <div className="my-4  flex flex-wrap gap-4 justify-center">
-              {editedState.images.map((image, index) => {
+              {editedState?.images?.map((image, index) => {
                 const imageUrl = typeof image === "string" ? image : image.url;
 
                 return (
@@ -235,7 +230,7 @@ const Propertie = () => {
         ) : (
           <Carousel
             height="h-screen max-[1200px]:h-[87vh] max-[1000px]:h-[70vh] max-[600px]:h-[46vh]"
-            images={getImagesForCarousel(editedState.images)}
+            images={editedState?.images}
           />
         )}
 
