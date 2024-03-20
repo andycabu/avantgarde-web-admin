@@ -6,40 +6,44 @@ import Button from "../components/Button";
 import Carousel from "../components/Carousel";
 import Map from "../components/Map";
 import Input from "../components/Input";
+import useInputState from "../hooks/useInputState";
 
 const Propertie = () => {
   const { state } = useLocation();
   const isCreating = !state;
-
   const defaultState = {
     title: "",
     price: 0,
-    information: [
-      { id: 1, text: "0", type: "beds" },
-      { id: 2, text: "0", type: "baths" },
-      { id: 3, text: "0", type: "houseSize" },
-      { id: 4, text: "0", type: "lotSize" },
-    ],
+    bedrooms: 0,
+    bathrooms: 0,
+    houseSize: 0,
+    area: 0,
     description: "",
     lat: "",
     lng: "",
     images: [],
   };
-  console.log(state);
 
   const initialState = isCreating
     ? defaultState
     : {
         title: state.title,
         price: state.price,
-        information: state?.information?.map((info) => ({ ...info })),
+        bedrooms: state.bedrooms,
+        bathrooms: state.bathrooms,
+        houseSize: state.houseSize,
+        area: state.area,
         description: state.description,
         lat: state.lat,
         lng: state.lng,
         images: state.Images,
       };
+  const [editedState, handleChange, setEditedState] =
+    useInputState(initialState);
+
+  console.log(editedState);
+
   const [isEditing, setIsEditing] = useState(isCreating && true);
-  const [editedState, setEditedState] = useState(initialState);
 
   const toggleEdit = () => {
     const editing = !isEditing;
@@ -49,24 +53,12 @@ const Propertie = () => {
     }
   };
 
-  const handleChange = (key, value) => {
-    setEditedState({ ...editedState, [key]: value });
-  };
   const adjustTextareaHeight = () => {
     const textarea = document.querySelector("#descriptionTextarea");
     if (textarea) {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
-  };
-
-  const handleInfoChange = (id, text) => {
-    setEditedState({
-      ...editedState,
-      information: editedState?.information?.map((info) =>
-        info.id === id ? { ...info, text } : info
-      ),
-    });
   };
 
   const handleSave = () => {
@@ -82,7 +74,10 @@ const Propertie = () => {
     setEditedState({
       title: state.title,
       price: state.price,
-      information: state.information,
+      bedrooms: state.bedrooms,
+      bathrooms: state.bathrooms,
+      houseSize: state.houseSize,
+      area: state.area,
       description: state.description,
       lat: state.lat,
       lng: state.lng,
@@ -93,9 +88,9 @@ const Propertie = () => {
 
   const handleAddImages = (e) => {
     const newImages = Array.from(e.target.files).map((file) => ({
-      url: URL.createObjectURL(file),
-      file: file,
+      img: URL.createObjectURL(file),
     }));
+    console.log(newImages);
 
     setEditedState((prevState) => ({
       ...prevState,
@@ -103,12 +98,38 @@ const Propertie = () => {
     }));
   };
 
-  const handleRemoveImage = (index) => {
+  const handleRemoveImage = (id) => {
     setEditedState((prevState) => ({
       ...prevState,
-      images: prevState.images.filter((_, i) => i !== index),
+      images: prevState.images.filter((image) => image.id !== id),
     }));
   };
+  const information = [
+    {
+      id: 1,
+      type: "beds",
+      text: editedState.bedrooms,
+      name: "bedrooms",
+    },
+    {
+      id: 2,
+      type: "baths",
+      text: editedState.bathrooms,
+      name: "bathrooms",
+    },
+    {
+      id: 3,
+      type: "houseSize",
+      text: editedState.houseSize,
+      name: "houseSize",
+    },
+    {
+      id: 4,
+      type: "lotSize",
+      text: editedState.area,
+      name: "area",
+    },
+  ];
   return (
     <Section className={"mt-[4.8rem]"}>
       <div className="pt-16 px-16 bg-white max-[800px]:px-8 max-[600px]:px-4">
@@ -143,16 +164,18 @@ const Propertie = () => {
               <div className="flex flex-wrap gap-4 justify-center w-full">
                 <Input
                   label="Titulo"
+                  name="title"
                   type="text"
                   value={editedState.title}
-                  onChange={(e) => handleChange("title", e.target.value)}
+                  onChange={handleChange}
                   placeholder="Añade el titulo de la propiedad"
                 />
                 <Input
                   label="Precio"
+                  name="price"
                   type="number"
                   value={editedState.price}
-                  onChange={(e) => handleChange("price", e.target.value)}
+                  onChange={handleChange}
                   placeholder="Precio"
                 />
               </div>
@@ -165,7 +188,7 @@ const Propertie = () => {
           )}
         </div>
         <div className="my-8 flex max-[800px]:grid grid-cols-2 max-[600px]:grid-cols-2 gap-4 justify-center">
-          {editedState?.information?.map((info) => {
+          {information?.map((info) => {
             const infoLabels = {
               beds: "Habitaciones",
               baths: "Baños",
@@ -180,10 +203,11 @@ const Propertie = () => {
                 {isEditing ? (
                   <Input
                     label={label}
-                    type="text"
+                    name={info.name}
+                    type="number"
                     value={info.text}
                     size={info.text.length || 1}
-                    onChange={(e) => handleInfoChange(info.id, e.target.value)}
+                    onChange={handleChange}
                     placeholder="Hab."
                   />
                 ) : (
@@ -200,17 +224,15 @@ const Propertie = () => {
             <h3 className="text-[26px] font-bold w-full text-center">Fotos</h3>
             <div className="my-4  flex flex-wrap gap-4 justify-center">
               {editedState?.images?.map((image, index) => {
-                const imageUrl = typeof image === "string" ? image : image.url;
-
                 return (
                   <div key={index} className=" relative mr-2 ">
                     <img
                       className="w-44 h-44 object-cover"
-                      src={imageUrl}
+                      src={image.img}
                       alt={`Imagen ${index + 1}`}
                     />
                     <button
-                      onClick={() => handleRemoveImage(index)}
+                      onClick={() => handleRemoveImage(image.id)}
                       className="absolute top-0 right-0 bg-red-500 text-white"
                     >
                       X
@@ -242,7 +264,8 @@ const Propertie = () => {
             <textarea
               id="descriptionTextarea"
               value={editedState.description}
-              onChange={(e) => handleChange("description", e.target.value)}
+              name="description"
+              onChange={handleChange}
               className="w-full border-2 border-gray-200 p-8 my-4"
             />
           ) : (
@@ -261,17 +284,19 @@ const Propertie = () => {
               <Input
                 label="Latitud"
                 type="text"
+                name="lat"
                 value={editedState.lat}
                 size={editedState.lat.toString().length || 1}
-                onChange={(e) => handleChange("lat", e.target.value)}
+                onChange={handleChange}
                 placeholder="Latitud"
               />
               <Input
                 label="Longitud"
                 type="text"
+                name="lng"
                 value={editedState.lng}
                 size={editedState.lng.toString().length || 1}
-                onChange={(e) => handleChange("lng", e.target.value)}
+                onChange={handleChange}
                 placeholder="Longitud"
               />
             </div>
