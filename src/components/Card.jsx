@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { URL_LOCAL } from "../constants/constants";
 import PropTypes from "prop-types";
 import Carousel from "./Carousel";
 import Icon from "./Icon";
@@ -6,6 +8,14 @@ import Button from "./Button";
 
 const Card = ({ properties }) => {
   const navigate = useNavigate();
+
+  const deleteProperty = async (propertyId) => {
+    try {
+      await axios.delete(`${URL_LOCAL}properties${propertyId}`);
+    } catch (error) {
+      console.error("Error deleting property:", error);
+    }
+  };
 
   return (
     <div className="grid bg-white grid-cols-3 place-items-center gap-6 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1 py-8 px-12 max-[800px]:px-4 max-[600px]:px-4">
@@ -48,6 +58,7 @@ const Card = ({ properties }) => {
                 text="Editar"
               />
               <Button
+                onClick={() => deleteProperty(property.id)}
                 className="py-2 px-4 text-[18px] h-[48px] hover:bg-red-600 bg-red-500 "
                 text="Borrar"
               />

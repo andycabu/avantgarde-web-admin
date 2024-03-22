@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Section from "../components/Section";
 import Icon from "../components/Icon";
 import Button from "../components/Button";
@@ -7,6 +8,8 @@ import Carousel from "../components/Carousel";
 import Map from "../components/Map";
 import Input from "../components/Input";
 import useInputState from "../hooks/useInputState";
+import { URL_LOCAL } from "../constants/constants";
+import { addImages } from "../api/s3";
 
 const Propertie = () => {
   const { state } = useLocation();
@@ -19,10 +22,13 @@ const Propertie = () => {
     houseSize: 0,
     area: 0,
     description: "",
-    lat: "",
-    lng: "",
+    lat: 0,
+    lng: 0,
     images: [],
   };
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const navigate = useNavigate();
 
   const initialState = isCreating
     ? defaultState
@@ -40,8 +46,7 @@ const Propertie = () => {
       };
   const [editedState, handleChange, setEditedState] =
     useInputState(initialState);
-
-  console.log(editedState);
+  const [originalState, setOriginalState] = useState(initialState);
 
   const [isEditing, setIsEditing] = useState(isCreating && true);
 
@@ -61,36 +66,54 @@ const Propertie = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    const onProgress = (progress, image) => {
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [image.title]: progress,
+      }));
+    };
+
+    const results = await addImages(editedState.images, onProgress);
+
+    setEditedState((prevState) => ({
+      ...prevState,
+      images: [...results],
+    }));
+
+    const newState = { ...editedState, images: [...results] };
+
     if (isCreating) {
-      // Lógica para guardar una nueva propiedad
+      const res = await axios.post(`${URL_LOCAL}properties`, newState);
+      if (res.status === 200) {
+        navigate("/");
+      }
     } else {
-      // Lógica para actualizar una propiedad existente
+      const res = await axios.put(
+        `${URL_LOCAL}properties${state.id}`,
+        newState
+      );
+
+      console.log(res);
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditedState({
-      title: state.title,
-      price: state.price,
-      bedrooms: state.bedrooms,
-      bathrooms: state.bathrooms,
-      houseSize: state.houseSize,
-      area: state.area,
-      description: state.description,
-      lat: state.lat,
-      lng: state.lng,
-      images: state.images,
-    });
+    setEditedState(originalState);
     setIsEditing(false);
+    if (isCreating) {
+      navigate("/");
+    }
   };
 
   const handleAddImages = (e) => {
+    setSelectedFiles(e.target.files);
     const newImages = Array.from(e.target.files).map((file) => ({
+      title: file.name,
+      type: file.type,
       img: URL.createObjectURL(file),
     }));
-    console.log(newImages);
 
     setEditedState((prevState) => ({
       ...prevState,
@@ -104,6 +127,7 @@ const Propertie = () => {
       images: prevState.images.filter((image) => image.id !== id),
     }));
   };
+
   const information = [
     {
       id: 1,
@@ -211,9 +235,11 @@ const Propertie = () => {
                     placeholder="Hab."
                   />
                 ) : (
-                  <span>
-                    {info.text} m<sup>2</sup>
-                  </span>
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: `${info.text} M<sup>2</sup>`,
+                    }}
+                  />
                 )}
               </div>
             );
@@ -248,6 +274,24 @@ const Propertie = () => {
               multiple
               onChange={handleAddImages}
             />
+            {selectedFiles.length > 0 && (
+              <div className="mt-4">
+                {Array.from(selectedFiles).map((file) => (
+                  <div key={file.name} className="flex flex-col mb-2">
+                    <div className="flex justify-between items-center">
+                      <span>{file.name}</span>
+                      <span>{uploadProgress[file.name] || 0}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                      <div
+                        className="bg-green-600 h-1.5 rounded-full"
+                        style={{ width: `${uploadProgress[file.name] || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         ) : (
           <Carousel
@@ -283,7 +327,7 @@ const Propertie = () => {
             <div className="flex gap-4 justify-center">
               <Input
                 label="Latitud"
-                type="text"
+                type="number"
                 name="lat"
                 value={editedState.lat}
                 size={editedState.lat.toString().length || 1}
@@ -292,7 +336,7 @@ const Propertie = () => {
               />
               <Input
                 label="Longitud"
-                type="text"
+                type="number"
                 name="lng"
                 value={editedState.lng}
                 size={editedState.lng.toString().length || 1}
